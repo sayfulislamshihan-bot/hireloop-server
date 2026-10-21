@@ -38,6 +38,12 @@ export async function connectToMongoDB() {
         res.send(result);
     })
 
+    // company related apis
+    app.post('/api/companies', async(req, res) =>{
+        const company = req.body;
+        const result = await companyCollection.insertOne(company);
+        res.send(result);
+    })
 
     console.log('You successfully connected to MongoDB!');
     return client;
