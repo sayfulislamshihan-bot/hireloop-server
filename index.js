@@ -39,6 +39,16 @@ export async function connectToMongoDB() {
     })
 
     // company related apis
+
+    app.get('/api/my/companies', async(req, res) =>{
+        const query = {};
+        if(req.query.recruiterId){
+            query.recruiterId = req.query.recruiterId;
+        }
+        const result = await companyCollection.findOne(query);
+        res.send(result);
+    })
+
     app.post('/api/companies', async(req, res) =>{
         const company = req.body;
         const result = await companyCollection.insertOne(company);
