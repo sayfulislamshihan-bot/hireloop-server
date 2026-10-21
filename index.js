@@ -2,15 +2,29 @@
 import express from 'express';
 import { MongoClient } from 'mongodb';
 import 'dotenv/config';
-
+import cors from 'cors';
 const app = express();
 const port = 5000;
+
+app.use(cors());
+app.use(express.json());
 
 const client = new MongoClient(process.env.MONGO_DB_URI);
 
 export async function connectToMongoDB() {
   try {
     await client.connect();
+
+    const database = client.db("hireloop_db");
+    const jobCollection = database.collection("jobs");
+
+    app.post('/api/jobs', async (req, res) =>{
+        const job = req.body;
+        const result = await jobCollection.insertOne(job);
+        res.send(result);
+    })
+
+
     console.log('You successfully connected to MongoDB!');
     return client;
   } catch (err) {
