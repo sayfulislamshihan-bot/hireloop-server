@@ -1,6 +1,6 @@
 
 import express from 'express';
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 import 'dotenv/config';
 import cors from 'cors';
 const app = express();
@@ -38,6 +38,15 @@ export async function connectToMongoDB() {
             const result = await cursor.toArray();
             res.send(result);
         })
+
+      app.get('/api/jobs/:id', async (req, res) => {
+          const id = req.params.id;
+          const query = {
+              _id: new ObjectId(id)
+          }
+          const result = await jobCollection.findOne(query);
+          res.send(result);
+      })
 
     app.post('/api/jobs', async (req, res) =>{
         const job = req.body;
