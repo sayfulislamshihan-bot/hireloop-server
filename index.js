@@ -50,6 +50,13 @@ export async function connectToMongoDB() {
     })
 
     // company related apis
+
+    app.get('/api/companies', async (req, res) => {
+        const cursor = companyCollection.find().skip(5);
+        const result = await cursor.toArray();
+        res.send(result);
+    })
+
     app.get('/api/my/companies', async(req, res) =>{
         const query = {};
         if(req.query.recruiterId){
