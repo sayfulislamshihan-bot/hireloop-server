@@ -19,6 +19,7 @@ export async function connectToMongoDB() {
     const jobCollection = database.collection("jobs");
     const companyCollection = database.collection("companies");
     const userCollection = database.collection("user");
+    const applicationsCollection = database.collection("applications");
 
     app.get('/api/users', async(req, res) =>{
             const cursor = userCollection.find();
@@ -57,6 +58,20 @@ export async function connectToMongoDB() {
         const result = await jobCollection.insertOne(newJob);
         res.send(result);
     })
+
+
+    // application related apis
+
+    app.post('/api/applications', async (req, res) => {
+        const application = req.body;
+        const newApplication = {
+            ...application,
+            createdAt: new Date()
+        }
+        const result = await applicationsCollection.insertOne(newApplication);
+        res.send(result);
+    })
+
 
     // company related apis
 
