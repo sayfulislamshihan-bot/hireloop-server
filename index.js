@@ -21,6 +21,7 @@ export async function connectToMongoDB() {
     const userCollection = database.collection("user");
     const applicationsCollection = database.collection("applications");
     const planCollection = database.collection('plans');
+    const subscriptionCollection = database.collection('subscriptions');
 
     app.get('/api/users', async(req, res) =>{
             const cursor = userCollection.find();
@@ -87,7 +88,6 @@ export async function connectToMongoDB() {
 
 
     // company related apis
-
     app.get('/api/companies', async (req, res) => {
         const cursor = companyCollection.find().skip(5);
         const result = await cursor.toArray();
@@ -122,6 +122,30 @@ export async function connectToMongoDB() {
         }
         const plan = await planCollection.findOne(query);
         res.send(plan)
+    })
+
+
+    // subscription 
+    app.post('/api/subscriptions', async (req, res) => {
+        const data = req.body;
+        const subsInfo = {
+            ...data,
+            createdAt: new Date()
+        }
+
+        const result = await subscriptionCollection.insertOne(subsInfo);
+
+        // update the user plan information
+        const filter = { email: data.email };
+        // update the value of the 'quantity' field to 5
+        const updateDocument = {
+            $set: {
+                plan: data.planId,
+            },
+        };
+
+        const updateResult = await userCollection.updateOne(filter, updateDocument);
+        res.send(updateResult)
     })
 
 
