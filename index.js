@@ -89,7 +89,7 @@ export async function connectToMongoDB() {
 
     // company related apis
     app.get('/api/companies', async (req, res) => {
-        const cursor = companyCollection.find().skip(5);
+        const cursor = companyCollection.find();
         const result = await cursor.toArray();
         res.send(result);
     })
@@ -113,6 +113,20 @@ export async function connectToMongoDB() {
         res.send(result);
     })
 
+
+    //Update company status
+    app.patch('/api/companies/:id', async (req, res) => {
+        const id = req.params.id;
+        const updatedCompany = req.body;
+        const filter = { _id: new ObjectId(id) }
+        const updatedDoc = {
+            $set: {
+                status: updatedCompany.status
+            }
+        }
+        const result = await companyCollection.updateOne(filter, updatedDoc);
+        res.send(result);
+    })
 
     // plans 
     app.get('/api/plans', async (req, res) => {
