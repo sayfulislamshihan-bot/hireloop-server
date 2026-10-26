@@ -9,6 +9,27 @@ const port = 5000;
 app.use(cors());
 app.use(express.json());
 
+const logger = (req, res, next) => {
+    console.log('logger middleware logged', req.params);
+    next();
+}
+
+const verifyToken = (req, res, next) => {
+    console.log('headers', req.headers)
+    const authHeader = req.headers?.authorization;
+    if (!authHeader) {
+        return res.status(401).send({ message: 'unauthorized access' })
+    }
+
+    const token = authHeader.split(' ')[1]
+
+    if (!token) {
+        return res.status(401).send({ message: 'unauthorized access' })
+    }
+
+    next();
+}
+
 const client = new MongoClient(process.env.MONGO_DB_URI);
 
 export async function connectToMongoDB() {
@@ -88,7 +109,7 @@ export async function connectToMongoDB() {
 
 
     // company related apis
-    app.get('/api/companies', async (req, res) => {
+    app.get('/api/companies',verifyToken, async (req, res) => {
         const cursor = companyCollection.find();
         const result = await cursor.toArray();
         res.send(result);
@@ -115,7 +136,7 @@ export async function connectToMongoDB() {
 
 
     //Update company status
-    app.patch('/api/companies/:id', async (req, res) => {
+    app.patch('/api/companies/:id',  logger, verifyToken, async (req, res) => {
         const id = req.params.id;
         const updatedCompany = req.body;
         const filter = { _id: new ObjectId(id) }
