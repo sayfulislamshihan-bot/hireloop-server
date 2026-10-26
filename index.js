@@ -55,12 +55,13 @@ export async function connectToMongoDB() {
             _id: userId
         }
 
-        const user = await usersCollection.findOne(userQuery);
+        const user = await userCollection.findOne(userQuery);
         // set data in the req object
         req.user = user;
         next();
     }
 
+    // must be used after verifyToken middleware
     const verifySeeker = async (req, res, next) => {
         if (req.user?.role !== 'seeker') {
             return res.status(403).send({ message: 'forbidden access' })
@@ -68,6 +69,21 @@ export async function connectToMongoDB() {
         next();
     }
 
+    // must be used after verifyToken middleware
+    const verifyRecruiter = async (req, res, next) => {
+        if (req.user?.role !== 'recruiter') {
+            return res.status(403).send({ message: 'forbidden access' })
+        }
+        next();
+    }
+
+    // must be used after verifyToken middleware
+    const verifyAdmin = async (req, res, next) => {
+        if (req.user.role !== 'admin') {
+            return res.status(403).send({ message: 'forbidden access' })
+        }
+        next();
+    }
 
     app.get('/api/users', async(req, res) =>{
             const cursor = userCollection.find();
@@ -116,6 +132,9 @@ export async function connectToMongoDB() {
 
             // check whether asking for user information or someone else
             console.log(req.user, req.query.applicantId)
+            if (req.user._id.toString() !== req.query.applicantId) {
+                return res.status(403).send({ message: 'forbidden access' })
+            }
 
       }
       if (req.query.jobId) {
@@ -165,7 +184,7 @@ export async function connectToMongoDB() {
 
 
     //Update company status
-    app.patch('/api/companies/:id',  logger, verifyToken, async (req, res) => {
+    app.patch('/api/companies/:id',  logger, verifyToken, verifyAdmin, async (req, res) => {
         const id = req.params.id;
         const updatedCompany = req.body;
         const filter = { _id: new ObjectId(id) }
