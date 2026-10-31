@@ -151,6 +151,12 @@ app.post('/api/companies', async (req, res) => {
   res.send(result);
 });
 
+
+app.get('/api/allCompanies', async (req, res) => {
+  const result = await companyCollection.find().toArray();
+  res.send(result);
+});
+
 // update company status
 app.patch('/api/companies/:id', logger, verifyToken, verifyAdmin, async (req, res) => {
   const id = req.params.id;
